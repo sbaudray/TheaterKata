@@ -6,6 +6,29 @@ function statement(invoice, plays) {
   return TextPrinter.printable(statement);
 }
 
+class TextPrinter {
+  static printable(statement) {
+    let new_line = "\n";
+
+    let str = "";
+
+    str += `Statement for ${statement.customer}`;
+    str += new_line;
+
+    for (let perf of statement.performances) {
+      str += ` ${perf.name}: ${perf.amount} (${perf.audience} seats)`;
+      str += new_line;
+    }
+
+    str += `Amount owed is ${statement.totalAmount}`;
+    str += new_line;
+    str += `You earned ${statement.volumeCredits} credits`;
+    str += new_line;
+
+    return str;
+  }
+}
+
 class Statement {
   constructor(invoice, recap) {
     this.invoice = invoice;
@@ -72,29 +95,6 @@ class PerformanceRecap {
       amount: Play.amount,
       volumeCredits: Play.volumeCredits,
     };
-  }
-}
-
-class TextPrinter {
-  static printable(statement) {
-    let new_line = "\n";
-
-    let str = "";
-
-    str += `Statement for ${statement.customer}`;
-    str += new_line;
-
-    for (let perf of statement.performances) {
-      str += ` ${perf.name}: ${perf.amount} (${perf.audience} seats)`;
-      str += new_line;
-    }
-
-    str += `Amount owed is ${statement.totalAmount}`;
-    str += new_line;
-    str += `You earned ${statement.volumeCredits} credits`;
-    str += new_line;
-
-    return str;
   }
 }
 
