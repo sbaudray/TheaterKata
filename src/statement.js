@@ -77,11 +77,11 @@ class PerformanceRecap {
   }
 
   getTotalAmountFrom(performances) {
-    return performances.reduce((acc, perf) => acc + perf.amount, 0);
+    return List.sumBy(performances, "amount");
   }
 
   getVolumeCreditsFrom(performances) {
-    return performances.reduce((acc, perf) => acc + perf.volumeCredits, 0);
+    return List.sumBy(performances, "volumeCredits");
   }
 
   individualRecap(perf) {
@@ -107,6 +107,12 @@ class CurrencyFormatter {
     }).format;
 
     return format(amount);
+  }
+}
+
+class List {
+  static sumBy(list, by) {
+    return list.reduce((acc, value) => acc + value[by], 0);
   }
 }
 
