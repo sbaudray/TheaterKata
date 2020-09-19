@@ -3,7 +3,7 @@ function statement(invoice, plays) {
 
   let statement = new Statement(invoice, recap).generate();
 
-  return new TextPrinter().printable(statement);
+  return TextPrinter.printable(statement);
 }
 
 class Statement {
@@ -76,7 +76,7 @@ class PerformanceRecap {
 }
 
 class TextPrinter {
-  printable(statement) {
+  static printable(statement) {
     let new_line = "\n";
 
     let str = "";
