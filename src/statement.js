@@ -16,11 +16,12 @@ function statement(invoice, plays) {
         thisAmount = new TragedyPlay(perf).amount;
         break;
       case "comedy":
-        thisAmount = 30000;
-        if (perf.audience > 20) {
-          thisAmount += 10000 + 500 * (perf.audience - 20);
-        }
-        thisAmount += 300 * perf.audience;
+        // thisAmount = 30000;
+        // if (perf.audience > 20) {
+        //   thisAmount += 10000 + 500 * (perf.audience - 20);
+        // }
+        // thisAmount += 300 * perf.audience;
+        thisAmount = new ComedyPlay(perf).amount;
         break;
       default:
         throw new Error(`unknown type: ${play.type}`);
@@ -43,9 +44,12 @@ function statement(invoice, plays) {
 class TragedyPlay {
   constructor(perf) {
     this.bigAudienceThreshold = 30;
-    this.baseAmount = 40_000;
 
     this.audience = perf.audience;
+  }
+
+  get baseAmount() {
+    return 40_000;
   }
 
   get amount() {
@@ -58,6 +62,30 @@ class TragedyPlay {
 
   get amountWithBigAudience() {
     return this.baseAmount + 1000 * (this.audience - this.bigAudienceThreshold);
+  }
+}
+
+class ComedyPlay {
+  constructor(perf) {
+    this.bigAudienceThreshold = 20;
+
+    this.audience = perf.audience;
+  }
+
+  get baseAmount() {
+    return 30_000 + 300 * this.audience;
+  }
+
+  get amount() {
+    if (this.audience > this.bigAudienceThreshold) {
+      return this.amountWithBigAudience;
+    }
+
+    return this.baseAmount;
+  }
+
+  get amountWithBigAudience() {
+    return this.baseAmount + 10000 + 500 * (this.audience - 20);
   }
 }
 
