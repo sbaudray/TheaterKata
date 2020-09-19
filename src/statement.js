@@ -86,14 +86,15 @@ class PerformanceRecap {
 
   individualRecap(perf) {
     const play = this.plays[perf.playID];
-    let Klass = PlayKlassForType(play.type);
-    let Play = new Klass(perf);
+
+    let PlayPerfKlass = playPerformanceKlassForType(play.type);
+    let PlayPerf = new PlayPerfKlass(perf);
 
     return {
       name: play.name,
       audience: perf.audience,
-      amount: Play.amount,
-      volumeCredits: Play.volumeCredits,
+      amount: PlayPerf.amount,
+      volumeCredits: PlayPerf.volumeCredits,
     };
   }
 }
@@ -116,10 +117,10 @@ class List {
   }
 }
 
-function PlayKlassForType(type) {
+function playPerformanceKlassForType(type) {
   let klass = {
-    tragedy: TragedyPlay,
-    comedy: ComedyPlay,
+    tragedy: TragedyPlayPerformance,
+    comedy: ComedyPlayPerformance,
   }[type];
 
   if (!klass) {
@@ -129,7 +130,7 @@ function PlayKlassForType(type) {
   return klass;
 }
 
-class Play {
+class PlayPerformance {
   constructor(perf) {
     this.audience = perf.audience;
   }
@@ -143,7 +144,7 @@ class Play {
   }
 }
 
-class TragedyPlay extends Play {
+class TragedyPlayPerformance extends PlayPerformance {
   constructor(perf) {
     super(perf);
     this.bigAudienceThreshold = 30;
@@ -166,7 +167,7 @@ class TragedyPlay extends Play {
   }
 }
 
-class ComedyPlay extends Play {
+class ComedyPlayPerformance extends PlayPerformance {
   constructor(perf) {
     super(perf);
     this.bigAudienceThreshold = 20;
