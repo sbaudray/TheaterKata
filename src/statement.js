@@ -1,17 +1,26 @@
 function statement(invoice, plays) {
   let totalAmount = 0;
   let volumeCredits = 0;
-  let result = `Statement for ${invoice.customer}\n`;
   const format = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
   }).format;
 
+  let statement = {};
+
+  statement.customer = invoice.customer;
+
+  statement.plays = [];
+
   for (let perf of invoice.performances) {
+    let playRecap = {};
+
     const play = plays[perf.playID];
+
     let Play;
     let thisAmount = 0;
+
     switch (play.type) {
       case "tragedy":
         Play = new TragedyPlay(perf);
@@ -24,16 +33,37 @@ function statement(invoice, plays) {
     }
 
     thisAmount = Play.amount;
+
     volumeCredits += Play.volumeCredits;
-    // print line for this order
-    result += ` ${play.name}: ${format(thisAmount / 100)} (${
-      perf.audience
-    } seats)\n`;
     totalAmount += thisAmount;
+
+    playRecap.name = play.name;
+    playRecap.amount = format(thisAmount / 100);
+    playRecap.audience = perf.audience;
+
+    statement.plays.push(playRecap);
   }
-  result += `Amount owed is ${format(totalAmount / 100)}\n`;
-  result += `You earned ${volumeCredits} credits\n`;
-  return result;
+
+  statement.volumeCredits = volumeCredits;
+  statement.totalAmount = format(totalAmount / 100);
+
+  return new TextPrinter().print(statement);
+}
+
+class TextPrinter {
+  print(statement) {
+    let str = "";
+    str += `Statement for ${statement.customer}\n`;
+
+    for (let play of statement.plays) {
+      str += ` ${play.name}: ${play.amount} (${play.audience} seats)\n`;
+    }
+
+    str += `Amount owed is ${statement.totalAmount}\n`;
+    str += `You earned ${statement.volumeCredits} credits\n`;
+
+    return str;
+  }
 }
 
 class Play {
