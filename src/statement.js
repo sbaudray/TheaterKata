@@ -15,15 +15,15 @@ function statement(invoice, plays) {
     switch (play.type) {
       case "tragedy":
         Play = new TragedyPlay(perf);
-        thisAmount = Play.amount;
         break;
       case "comedy":
         Play = new ComedyPlay(perf);
-        thisAmount = Play.amount;
         break;
       default:
         throw new Error(`unknown type: ${play.type}`);
     }
+
+    thisAmount = Play.amount;
     volumeCredits += Play.volumeCredits;
     // print line for this order
     result += ` ${play.name}: ${format(thisAmount / 100)} (${
@@ -36,9 +36,6 @@ function statement(invoice, plays) {
   return result;
 }
 
-// volumeCredits += Math.max(perf.audience - 30, 0);
-// // add extra credit for every ten comedy attendees
-// if ("comedy" === play.type) volumeCredits += Math.floor(perf.audience / 5);
 class TragedyPlay {
   constructor(perf) {
     this.bigAudienceThreshold = 30;
