@@ -56,8 +56,12 @@ class TragedyPlay extends Play {
     return 40_000;
   }
 
+  get bigAudience() {
+    return this.audience > 30;
+  }
+
   get amount() {
-    if (this.audience > this.bigAudienceThreshold) {
+    if (this.bigAudience) {
       return this.amountWithBigAudience;
     }
 
@@ -79,8 +83,12 @@ class ComedyPlay extends Play {
     return 30_000 + 300 * this.audience;
   }
 
+  get bigAudience() {
+    return this.audience > 20;
+  }
+
   get amount() {
-    if (this.audience > this.bigAudienceThreshold) {
+    if (this.bigAudience) {
       return this.amountWithBigAudience;
     }
 
@@ -92,7 +100,11 @@ class ComedyPlay extends Play {
   }
 
   get amountWithBigAudience() {
-    return this.baseAmount + 10000 + 500 * (this.audience - 20);
+    return (
+      this.baseAmount +
+      10_000 +
+      500 * (this.audience - this.bigAudienceThreshold)
+    );
   }
 }
 
