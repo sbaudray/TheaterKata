@@ -1,48 +1,101 @@
 function statement(invoice, plays) {
-  let totalAmount = 0;
-  let volumeCredits = 0;
+  let recap = new PerformanceRecap(invoice.performances, plays).generate();
 
-  let statement = {};
-
-  statement.customer = invoice.customer;
-
-  statement.performances = invoice.performances.map(function getPerfomanceRecap(
-    perf
-  ) {
-    let perfRecap = {};
-
-    const play = plays[perf.playID];
-
-    let Play;
-    let thisAmount = 0;
-
-    switch (play.type) {
-      case "tragedy":
-        Play = new TragedyPlay(perf);
-        break;
-      case "comedy":
-        Play = new ComedyPlay(perf);
-        break;
-      default:
-        throw new Error(`unknown type: ${play.type}`);
-    }
-
-    thisAmount = Play.amount;
-
-    volumeCredits += Play.volumeCredits;
-    totalAmount += thisAmount;
-
-    perfRecap.name = play.name;
-    perfRecap.amount = CurrencyFormatter.formatUSD(thisAmount / 100);
-    perfRecap.audience = perf.audience;
-
-    return perfRecap;
-  });
-
-  statement.volumeCredits = volumeCredits;
-  statement.totalAmount = CurrencyFormatter.formatUSD(totalAmount / 100);
+  let statement = new Statement(invoice, recap).generate();
 
   return new TextPrinter().print(statement);
+}
+
+class Statement {
+  constructor(invoice, recap) {
+    this.invoice = invoice;
+    this.recap = recap;
+  }
+
+  generate() {
+    return {
+      customer: this.invoice.customer,
+      volumeCredits: this.recap.volumeCredits,
+      totalAmount: this.formatAmount(this.recap.totalAmount),
+      performances: this.formatPerformances(this.recap.performances),
+    };
+  }
+
+  formatAmount(amount) {
+    return CurrencyFormatter.formatUSD(amount / 100);
+  }
+
+  formatPerformances(perfs) {
+    return perfs.map((perf) => ({
+      ...perf,
+      amount: this.formatAmount(perf.amount),
+    }));
+  }
+}
+
+class PerformanceRecap {
+  constructor(performances, plays) {
+    this.performances = performances;
+    this.plays = plays;
+
+    this.individualRecap = this.individualRecap.bind(this);
+  }
+
+  generate() {
+    let performances = this.performances.map(this.individualRecap);
+    let totalAmount = this.getTotalAmountFrom(performances);
+    let volumeCredits = this.getVolumeCreditsFrom(performances);
+
+    return {
+      totalAmount,
+      volumeCredits,
+      performances,
+    };
+  }
+
+  getTotalAmountFrom(performances) {
+    return performances.reduce((acc, perf) => acc + perf.amount, 0);
+  }
+
+  getVolumeCreditsFrom(performances) {
+    return performances.reduce((acc, perf) => acc + perf.volumeCredits, 0);
+  }
+
+  individualRecap(perf) {
+    const play = this.plays[perf.playID];
+    let Klass = PlayKlassForType(play.type);
+    let Play = new Klass(perf, play);
+
+    return {
+      name: play.name,
+      audience: perf.audience,
+      amount: Play.amount,
+      volumeCredits: Play.volumeCredits,
+    };
+  }
+}
+
+class TextPrinter {
+  print(statement) {
+    let new_line = "\n";
+
+    let str = "";
+
+    str += `Statement for ${statement.customer}`;
+    str += new_line;
+
+    for (let perf of statement.performances) {
+      str += ` ${perf.name}: ${perf.amount} (${perf.audience} seats)`;
+      str += new_line;
+    }
+
+    str += `Amount owed is ${statement.totalAmount}`;
+    str += new_line;
+    str += `You earned ${statement.volumeCredits} credits`;
+    str += new_line;
+
+    return str;
+  }
 }
 
 class CurrencyFormatter {
@@ -57,20 +110,17 @@ class CurrencyFormatter {
   }
 }
 
-class TextPrinter {
-  print(statement) {
-    let str = "";
-    str += `Statement for ${statement.customer}\n`;
+function PlayKlassForType(type) {
+  let klass = {
+    tragedy: TragedyPlay,
+    comedy: ComedyPlay,
+  }[type];
 
-    for (let perf of statement.performances) {
-      str += ` ${perf.name}: ${perf.amount} (${perf.audience} seats)\n`;
-    }
-
-    str += `Amount owed is ${statement.totalAmount}\n`;
-    str += `You earned ${statement.volumeCredits} credits\n`;
-
-    return str;
+  if (!klass) {
+    throw new Error("unknown type");
   }
+
+  return klass;
 }
 
 class Play {
