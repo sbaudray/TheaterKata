@@ -6,10 +6,10 @@ function statement(invoice, plays) {
 
   statement.customer = invoice.customer;
 
-  statement.plays = [];
-
-  for (let perf of invoice.performances) {
-    let playRecap = {};
+  statement.performances = invoice.performances.map(function getPerfomanceRecap(
+    perf
+  ) {
+    let perfRecap = {};
 
     const play = plays[perf.playID];
 
@@ -32,12 +32,12 @@ function statement(invoice, plays) {
     volumeCredits += Play.volumeCredits;
     totalAmount += thisAmount;
 
-    playRecap.name = play.name;
-    playRecap.amount = CurrencyFormatter.formatUSD(thisAmount / 100);
-    playRecap.audience = perf.audience;
+    perfRecap.name = play.name;
+    perfRecap.amount = CurrencyFormatter.formatUSD(thisAmount / 100);
+    perfRecap.audience = perf.audience;
 
-    statement.plays.push(playRecap);
-  }
+    return perfRecap;
+  });
 
   statement.volumeCredits = volumeCredits;
   statement.totalAmount = CurrencyFormatter.formatUSD(totalAmount / 100);
@@ -62,8 +62,8 @@ class TextPrinter {
     let str = "";
     str += `Statement for ${statement.customer}\n`;
 
-    for (let play of statement.plays) {
-      str += ` ${play.name}: ${play.amount} (${play.audience} seats)\n`;
+    for (let perf of statement.performances) {
+      str += ` ${perf.name}: ${perf.amount} (${perf.audience} seats)\n`;
     }
 
     str += `Amount owed is ${statement.totalAmount}\n`;
