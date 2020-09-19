@@ -44,6 +44,10 @@ class Play {
   get volumeCredits() {
     return Math.max(this.audience - 30, 0);
   }
+
+  get bigAudience() {
+    return this.audience > this.bigAudienceThreshold;
+  }
 }
 
 class TragedyPlay extends Play {
@@ -54,10 +58,6 @@ class TragedyPlay extends Play {
 
   get baseAmount() {
     return 40_000;
-  }
-
-  get bigAudience() {
-    return this.audience > 30;
   }
 
   get amount() {
@@ -81,10 +81,6 @@ class ComedyPlay extends Play {
 
   get baseAmount() {
     return 30_000 + 300 * this.audience;
-  }
-
-  get bigAudience() {
-    return this.audience > 20;
   }
 
   get amount() {
