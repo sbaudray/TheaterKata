@@ -64,7 +64,7 @@ class PerformanceRecap {
   individualRecap(perf) {
     const play = this.plays[perf.playID];
     let Klass = PlayKlassForType(play.type);
-    let Play = new Klass(perf, play);
+    let Play = new Klass(perf);
 
     return {
       name: play.name,
