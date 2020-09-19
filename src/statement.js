@@ -1,11 +1,6 @@
 function statement(invoice, plays) {
   let totalAmount = 0;
   let volumeCredits = 0;
-  const format = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format;
 
   let statement = {};
 
@@ -38,16 +33,28 @@ function statement(invoice, plays) {
     totalAmount += thisAmount;
 
     playRecap.name = play.name;
-    playRecap.amount = format(thisAmount / 100);
+    playRecap.amount = CurrencyFormatter.formatUSD(thisAmount / 100);
     playRecap.audience = perf.audience;
 
     statement.plays.push(playRecap);
   }
 
   statement.volumeCredits = volumeCredits;
-  statement.totalAmount = format(totalAmount / 100);
+  statement.totalAmount = CurrencyFormatter.formatUSD(totalAmount / 100);
 
   return new TextPrinter().print(statement);
+}
+
+class CurrencyFormatter {
+  static formatUSD(amount) {
+    const format = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    }).format;
+
+    return format(amount);
+  }
 }
 
 class TextPrinter {
