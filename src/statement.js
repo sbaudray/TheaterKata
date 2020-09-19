@@ -10,26 +10,21 @@ function statement(invoice, plays) {
 
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
+    let Play;
     let thisAmount = 0;
     switch (play.type) {
       case "tragedy":
-        thisAmount = new TragedyPlay(perf).amount;
+        Play = new TragedyPlay(perf);
+        thisAmount = Play.amount;
         break;
       case "comedy":
-        // thisAmount = 30000;
-        // if (perf.audience > 20) {
-        //   thisAmount += 10000 + 500 * (perf.audience - 20);
-        // }
-        // thisAmount += 300 * perf.audience;
-        thisAmount = new ComedyPlay(perf).amount;
+        Play = new ComedyPlay(perf);
+        thisAmount = Play.amount;
         break;
       default:
         throw new Error(`unknown type: ${play.type}`);
     }
-    // add volume credits
-    volumeCredits += Math.max(perf.audience - 30, 0);
-    // add extra credit for every ten comedy attendees
-    if ("comedy" === play.type) volumeCredits += Math.floor(perf.audience / 5);
+    volumeCredits += Play.volumeCredits;
     // print line for this order
     result += ` ${play.name}: ${format(thisAmount / 100)} (${
       perf.audience
@@ -41,6 +36,9 @@ function statement(invoice, plays) {
   return result;
 }
 
+// volumeCredits += Math.max(perf.audience - 30, 0);
+// // add extra credit for every ten comedy attendees
+// if ("comedy" === play.type) volumeCredits += Math.floor(perf.audience / 5);
 class TragedyPlay {
   constructor(perf) {
     this.bigAudienceThreshold = 30;
@@ -63,6 +61,10 @@ class TragedyPlay {
   get amountWithBigAudience() {
     return this.baseAmount + 1000 * (this.audience - this.bigAudienceThreshold);
   }
+
+  get volumeCredits() {
+    return Math.max(this.audience - 30, 0);
+  }
 }
 
 class ComedyPlay {
@@ -82,6 +84,14 @@ class ComedyPlay {
     }
 
     return this.baseAmount;
+  }
+
+  get volumeCredits() {
+    return this.baseVolumeCredits + Math.floor(this.audience / 5);
+  }
+
+  get baseVolumeCredits() {
+    return Math.max(this.audience - 30, 0);
   }
 
   get amountWithBigAudience() {
