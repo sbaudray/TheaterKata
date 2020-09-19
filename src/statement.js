@@ -36,11 +36,20 @@ function statement(invoice, plays) {
   return result;
 }
 
-class TragedyPlay {
+class Play {
   constructor(perf) {
-    this.bigAudienceThreshold = 30;
-
     this.audience = perf.audience;
+  }
+
+  get volumeCredits() {
+    return Math.max(this.audience - 30, 0);
+  }
+}
+
+class TragedyPlay extends Play {
+  constructor(perf) {
+    super(perf);
+    this.bigAudienceThreshold = 30;
   }
 
   get baseAmount() {
@@ -58,17 +67,12 @@ class TragedyPlay {
   get amountWithBigAudience() {
     return this.baseAmount + 1000 * (this.audience - this.bigAudienceThreshold);
   }
-
-  get volumeCredits() {
-    return Math.max(this.audience - 30, 0);
-  }
 }
 
-class ComedyPlay {
+class ComedyPlay extends Play {
   constructor(perf) {
+    super(perf);
     this.bigAudienceThreshold = 20;
-
-    this.audience = perf.audience;
   }
 
   get baseAmount() {
@@ -84,11 +88,7 @@ class ComedyPlay {
   }
 
   get volumeCredits() {
-    return this.baseVolumeCredits + Math.floor(this.audience / 5);
-  }
-
-  get baseVolumeCredits() {
-    return Math.max(this.audience - 30, 0);
+    return super.volumeCredits + Math.floor(this.audience / 5);
   }
 
   get amountWithBigAudience() {
