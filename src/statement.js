@@ -13,10 +13,7 @@ function statement(invoice, plays) {
     let thisAmount = 0;
     switch (play.type) {
       case "tragedy":
-        thisAmount = 40000;
-        if (perf.audience > 30) {
-          thisAmount += 1000 * (perf.audience - 30);
-        }
+        thisAmount = new TragedyPlay(perf).amount;
         break;
       case "comedy":
         thisAmount = 30000;
@@ -41,6 +38,27 @@ function statement(invoice, plays) {
   result += `Amount owed is ${format(totalAmount / 100)}\n`;
   result += `You earned ${volumeCredits} credits\n`;
   return result;
+}
+
+class TragedyPlay {
+  constructor(perf) {
+    this.bigAudienceThreshold = 30;
+    this.baseAmount = 40_000;
+
+    this.audience = perf.audience;
+  }
+
+  get amount() {
+    if (this.audience > this.bigAudienceThreshold) {
+      return this.amountWithBigAudience;
+    }
+
+    return this.baseAmount;
+  }
+
+  get amountWithBigAudience() {
+    return this.baseAmount + 1000 * (this.audience - this.bigAudienceThreshold);
+  }
 }
 
 module.exports = statement;
